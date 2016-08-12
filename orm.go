@@ -1,7 +1,7 @@
 package QesyDb
 
 func (m *Model)SetTable(Str string) *Model {
-    m.Table = "str"
+    m.Table = Str
     return m
 }
 
