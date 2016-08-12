@@ -54,7 +54,7 @@ func (m *Model) ExecSelectIndex() (map[string]map[string]string, error) {
 
 // ExecSelect is a method with a sql.
 func (m *Model) ExecSelect() ([]map[string]string, error) {
-    cond := m.getSQLCond()
+    cond := m.getSQLCond()    
     field := m.getSQLField()
     sort := m.getSort()
     limit := m.getSQLLimite()
