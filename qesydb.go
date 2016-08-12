@@ -187,8 +187,15 @@ func (m *Model)getSQLCond() string {
     if str, ok := m.Cond.(string); ok{
         return str
     }
-    if arr, ok := m.Cond.(map[string]interface{}); ok{
+    var strArr []string
+    if arr, ok := m.Cond.(map[string]string); ok{
         var strArr []string
+        for k, v := range arr{
+            strArr = append(strArr, k+"='"+v+"'")
+        }
+        return " WHERE "+ strings.Join(strArr, " && ")
+    }
+    if arr, ok := m.Cond.(map[string]interface{}); ok{        
         for k, v := range arr{
             if isStr, ok := v.(string); ok{
                 strArr = append(strArr, k+"='"+isStr+"'")
