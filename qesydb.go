@@ -49,6 +49,7 @@ func (m *Model) ExecSelectIndex() (map[string]map[string]string, error) {
         }
         retArr[v[m.Index]] = v
     }
+    m.Clean()
     return retArr, nil
 }
 
@@ -122,11 +123,13 @@ func (m *Model) ExecSelect() ([]map[string]string, error) {
             }
             resultsSlice = append(resultsSlice, result)
         }        
+        m.Clean()
         return resultsSlice, nil
 }
 
 func (m *Model) ExecSelectOne() (map[string]string, error) {
     resultsSlice, _ := m.ExecSelect()
+    m.Clean()
     return resultsSlice[0], nil
 }
 
@@ -139,6 +142,7 @@ func (m *Model) ExecUpdate() (sql.Result, error){
         return nil, err
     }
     result, err := stmt.Exec()
+    m.Clean()
     return result, err
 }
 
@@ -150,6 +154,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
         return nil, err
     }
     result, err := stmt.Exec()
+    m.Clean()
     return result, err
 }
 
@@ -161,6 +166,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
         return nil, err
     }
     result, err := stmt.Exec()
+    m.Clean()
     return result, err
 }
 
@@ -172,6 +178,7 @@ func (m *Model) ExecDelete() (sql.Result, error) {
         return nil, err
     }
     result, err := stmt.Exec()
+    m.Clean()
     return result, err
 }
 
@@ -255,4 +262,16 @@ func (m *Model)getSQLLimite() string {
         return " LIMIT "+fmt.Sprintf("%d", strArr[0])+", "+fmt.Sprintf("%d", strArr[1])
     }
     return ""
+}
+
+func (m *Model)Clean() {
+    m.Cond = nil
+    m.Insert = nil
+    m.Update = nil
+    m.Field = ""
+    m.Table = ""
+    m.Index = ""
+    m.Limit = nil
+    m.Sort = ""
+    m.Fetch = 0
 }
