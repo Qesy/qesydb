@@ -130,7 +130,7 @@ func (m *Model) ExecSelect() ([]map[string]string, error) {
 func (m *Model) ExecSelectOne() (map[string]string, error) {
     resultsSlice, err := m.ExecSelect()
     if resultsSlice == nil{
-        return resultsSlice, err
+        return nil, err
     }
     return resultsSlice[0], nil
 }
