@@ -128,8 +128,10 @@ func (m *Model) ExecSelect() ([]map[string]string, error) {
 }
 
 func (m *Model) ExecSelectOne() (map[string]string, error) {
-    resultsSlice, _ := m.ExecSelect()
-    m.Clean()
+    resultsSlice, err := m.ExecSelect()
+    if resultsSlice == nil{
+        return resultsSlice, err
+    }
     return resultsSlice[0], nil
 }
 
