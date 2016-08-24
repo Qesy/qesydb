@@ -22,7 +22,7 @@ type Model struct{
     Index string
     Limit interface{}
     Sort string
-    Fetch int
+    Tx *sql.Tx
 }
 
 // Connect  is a method with a sql.
@@ -264,13 +264,6 @@ func (m *Model)getSQLInsert() string {
     return "("+ strings.Join(fieldArr, ",") +") values ("+ strings.Join(valueArr, ",") +")"
 }
 
-func (m *Model)getSQLFatch() int {
-    if(m.Fetch == 0){
-        return 0
-    }
-    return 1
-}
-
 func (m *Model)getSQLLimite() string {
     if strArr, ok := m.Limit.([2]int); ok{
         return " LIMIT "+fmt.Sprintf("%d", strArr[0])+", "+fmt.Sprintf("%d", strArr[1])
@@ -287,5 +280,4 @@ func (m *Model)Clean() {
     m.Index = ""
     m.Limit = nil
     m.Sort = ""
-    m.Fetch = 0
 }
