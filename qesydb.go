@@ -162,8 +162,16 @@ func (m *Model) ExecUpdate() (sql.Result, error){
 
 func (m *Model) ExecInsert() (sql.Result, error) {
     insert := m.getSQLInsert()
-    sql := "INSERT INTO "+m.Table+" "+insert+";";
-    stmt, err := Db.Prepare(sql)
+    sqlStr := "INSERT INTO "+m.Table+" "+insert+";";
+    var err error
+    var stmt *sql.Stmt
+    //var stmt *sql.Stmt
+    if m.Tx != nil{
+        stmt, err = Db.Prepare(sqlStr)
+    }else{
+        stmt, err = m.Tx.Prepare(sqlStr)
+    }
+    
     if(err != nil){
         return nil, err
     }
