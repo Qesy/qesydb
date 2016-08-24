@@ -166,7 +166,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
     var err error
     var stmt *sql.Stmt
     //var stmt *sql.Stmt
-    if m.Tx != nil{
+    if m.Tx == nil{
         stmt, err = Db.Prepare(sqlStr)
     }else{
         stmt, err = m.Tx.Prepare(sqlStr)
