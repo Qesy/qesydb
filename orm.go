@@ -39,8 +39,3 @@ func (m *Model)SetSort(Sort string) *Model {
     m.Sort = Sort
     return m
 }
-
-func (m *Model)SetFetch(Fetch int) *Model {
-    m.Fetch = Fetch
-    return m
-}
