@@ -39,6 +39,18 @@ func Connect(connStr string){
     Db = sqlDb
 }
 
+func Begin() (*sql.Tx, error) {
+    return Db.Begin()    
+}
+
+func Rollback(tx *sql.Tx) error {
+    return tx.Rollback()
+}
+
+func Commit(tx *sql.Tx) error {
+    return tx.Commit()
+}
+
 // ExecSelectIndex  is a method with a sql.
 func (m *Model) ExecSelectIndex() (map[string]map[string]string, error) {
     resultsSlice, _ := m.ExecSelect()
