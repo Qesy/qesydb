@@ -71,8 +71,15 @@ func (m *Model) ExecSelect() ([]map[string]string, error) {
     field := m.getSQLField()
     sort := m.getSort()
     limit := m.getSQLLimite()
-    sql := "SELECT "+ field +" FROM "+m.Table+cond+sort+limit+";"
-    stmt, err := Db.Prepare(sql)
+    sqlStr := "SELECT "+ field +" FROM "+m.Table+cond+sort+limit+";"
+    var err error
+    var stmt *sql.Stmt
+    if m.Tx == nil{
+        stmt, err = Db.Prepare(sqlStr)
+    }else{
+        stmt, err = m.Tx.Prepare(sqlStr)
+    }
+    
     if(err != nil){
         return nil, err
     }
@@ -150,8 +157,14 @@ func (m *Model) ExecSelectOne() (map[string]string, error) {
 func (m *Model) ExecUpdate() (sql.Result, error){
     updateStr := m.getSQLUpdate()
     condStr := m.getSQLCond()
-    sql := "UPDATE "+ m.Table +" SET "+ updateStr + condStr +";";
-    stmt, err := Db.Prepare(sql)
+    sqlStr := "UPDATE "+ m.Table +" SET "+ updateStr + condStr +";";
+    var err error
+    var stmt *sql.Stmt
+    if m.Tx == nil{
+        stmt, err = Db.Prepare(sqlStr)
+    }else{
+        stmt, err = m.Tx.Prepare(sqlStr)
+    }    
     if(err != nil){
         return nil, err
     }
@@ -165,7 +178,6 @@ func (m *Model) ExecInsert() (sql.Result, error) {
     sqlStr := "INSERT INTO "+m.Table+" "+insert+";";
     var err error
     var stmt *sql.Stmt
-    //var stmt *sql.Stmt
     if m.Tx == nil{
         stmt, err = Db.Prepare(sqlStr)
     }else{
@@ -182,8 +194,15 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 
 func (m *Model) ExecReplace() (sql.Result, error) {
     insert := m.getSQLInsert()
-    sql := "REPLACE INTO "+m.Table+" "+insert+";";
-    stmt, err := Db.Prepare(sql)
+    sqlStr := "REPLACE INTO "+m.Table+" "+insert+";";
+    var err error
+    var stmt *sql.Stmt
+    if m.Tx == nil{
+        stmt, err = Db.Prepare(sqlStr)
+    }else{
+        stmt, err = m.Tx.Prepare(sqlStr)
+    }
+    
     if(err != nil){
         return nil, err
     }
@@ -194,8 +213,14 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 
 func (m *Model) ExecDelete() (sql.Result, error) {
     condStr := m.getSQLCond()
-    sql := "DELETE FROM "+ m.Table + condStr +";";
-    stmt, err := Db.Prepare(sql)
+    sqlStr := "DELETE FROM "+ m.Table + condStr +";";
+    var err error
+    var stmt *sql.Stmt
+    if m.Tx == nil{
+        stmt, err = Db.Prepare(sqlStr)
+    }else{
+        stmt, err = m.Tx.Prepare(sqlStr)
+    }    
     if(err != nil){
         return nil, err
     }
