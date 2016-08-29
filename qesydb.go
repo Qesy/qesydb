@@ -66,8 +66,9 @@ func (m *Model) ExecSelectIndex() (map[string]map[string]string, error) {
 }
 
 func (m *Model) ExecSelect() ([]map[string]string, error) {
+	ret, err := m.execSelect()
 	m.Clean()
-	return m.execSelect()
+	return ret, err
 }
 
 // ExecSelect is a method with a sql.
