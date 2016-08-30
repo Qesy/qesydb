@@ -39,3 +39,7 @@ func (m *Model)SetSort(Sort string) *Model {
     m.Sort = Sort
     return m
 }
+
+func (m *Model)SetDebug(Debug int) *Model {
+    m.IsDeug = Debug
+    return m

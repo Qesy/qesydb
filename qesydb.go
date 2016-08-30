@@ -22,6 +22,7 @@ type Model struct {
 	Index  string
 	Limit  interface{}
 	Sort   string
+	IsDeug int
 	Tx     *sql.Tx
 }
 
@@ -78,6 +79,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	sort := m.getSort()
 	limit := m.getSQLLimite()
 	sqlStr := "SELECT " + field + " FROM " + m.Table + cond + sort + limit + ";"
+	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
 	if m.Tx == nil {
@@ -163,6 +165,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 	updateStr := m.getSQLUpdate()
 	condStr := m.getSQLCond()
 	sqlStr := "UPDATE " + m.Table + " SET " + updateStr + condStr + ";"
+	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
 	if m.Tx == nil {
@@ -181,6 +184,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 func (m *Model) ExecInsert() (sql.Result, error) {
 	insert := m.getSQLInsert()
 	sqlStr := "INSERT INTO " + m.Table + " " + insert + ";"
+	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
 	if m.Tx == nil {
@@ -200,6 +204,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 func (m *Model) ExecReplace() (sql.Result, error) {
 	insert := m.getSQLInsert()
 	sqlStr := "REPLACE INTO " + m.Table + " " + insert + ";"
+	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
 	if m.Tx == nil {
@@ -219,6 +224,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 func (m *Model) ExecDelete() (sql.Result, error) {
 	condStr := m.getSQLCond()
 	sqlStr := "DELETE FROM " + m.Table + condStr + ";"
+	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
 	if m.Tx == nil {
@@ -318,4 +324,11 @@ func (m *Model) Clean() {
 	m.Index = ""
 	m.Limit = nil
 	m.Sort = ""
+	m.IsDeug = 0
+}
+
+func (m *Model) Debug(sql string) {
+	if m.IsDeug == 1 {
+		fmt.Println(sql)
+	}
 }
