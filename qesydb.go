@@ -98,7 +98,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
+	//defer stmt.Close()
 	defer rows.Close()
 	fields, err := rows.Columns()
 	if err != nil {
@@ -177,7 +177,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-	defer stmt.Close()
+	//defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +197,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-	defer stmt.Close()
+	//defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +217,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-	defer stmt.Close()
+	//defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -237,7 +237,7 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-	defer stmt.Close()
+	//defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
