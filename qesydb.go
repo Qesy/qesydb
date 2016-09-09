@@ -29,6 +29,9 @@ type Model struct {
 // Connect  is a method with a sql.
 func Connect(connStr string) {
 	sqlDb, err := sql.Open("mysql", connStr)
+	sqlDb.SetConnMaxLifetime(1800)
+	sqlDb.SetMaxIdleConns(400)
+	sqlDb.SetMaxOpenConns(600)
 	if err != nil {
 		log.Fatal("mysql connect error")
 	}
@@ -95,6 +98,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer stmt.Close()
 	defer rows.Close()
 	fields, err := rows.Columns()
 	if err != nil {
@@ -173,6 +177,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
+	defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +197,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-
+	defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +217,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-
+	defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -232,6 +237,7 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
+	defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
