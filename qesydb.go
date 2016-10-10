@@ -91,16 +91,16 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-
+	defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
 	rows, err := stmt.Query()
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
-	defer rows.Close()
+
 	fields, err := rows.Columns()
 	if err != nil {
 		return nil, err
