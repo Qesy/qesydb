@@ -29,7 +29,7 @@ type Model struct {
 // Connect  is a method with a sql.
 func Connect(connStr string) {
 	sqlDb, err := sql.Open("mysql", connStr)
-	//defer sqlDb.Close()
+	defer sqlDb.Close()
 	sqlDb.SetConnMaxLifetime(1800)
 	sqlDb.SetMaxIdleConns(400)
 	sqlDb.SetMaxOpenConns(600)
