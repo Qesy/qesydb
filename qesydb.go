@@ -93,17 +93,17 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	}
 	//defer stmt.Close()
 	if err != nil {
-		return []map[string]string{}, err
+		return nil, err
 	}
 	rows, err := stmt.Query()
 	defer rows.Close()
 	if err != nil {
-		return []map[string]string{}, err
+		return nil, err
 	}
 
 	fields, err := rows.Columns()
 	if err != nil {
-		return []map[string]string{}, err
+		return nil, err
 	}
 	var resultsSlice []map[string]string
 	for rows.Next() {
@@ -114,7 +114,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 			scanResultContainers = append(scanResultContainers, &scanResultContainer)
 		}
 		if err := rows.Scan(scanResultContainers...); err != nil {
-			return []map[string]string{}, err
+			return nil, err
 		}
 		for k, v := range fields {
 			rawValue := reflect.Indirect(reflect.ValueOf(scanResultContainers[k]))
