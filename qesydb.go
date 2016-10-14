@@ -97,11 +97,12 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 		return resultsSlice, err
 	}
 	rows, err := stmt.Query()
-	defer rows.Close()
+
 	if err != nil {
+		fmt.Println(sqlStr)
 		return resultsSlice, err
 	}
-
+	defer rows.Close()
 	fields, err := rows.Columns()
 	if err != nil {
 		return resultsSlice, err
