@@ -92,20 +92,21 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	//defer stmt.Close()
+	resultsSlice := []map[string]string{}
 	if err != nil {
-		return nil, err
+		return resultsSlice, err
 	}
 	rows, err := stmt.Query()
 	defer rows.Close()
 	if err != nil {
-		return nil, err
+		return resultsSlice, err
 	}
 
 	fields, err := rows.Columns()
 	if err != nil {
-		return nil, err
+		return resultsSlice, err
 	}
-	var resultsSlice []map[string]string
+
 	for rows.Next() {
 		result := make(map[string]string)
 		var scanResultContainers []interface{}
@@ -114,7 +115,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 			scanResultContainers = append(scanResultContainers, &scanResultContainer)
 		}
 		if err := rows.Scan(scanResultContainers...); err != nil {
-			return nil, err
+			return resultsSlice, err
 		}
 		for k, v := range fields {
 			rawValue := reflect.Indirect(reflect.ValueOf(scanResultContainers[k]))
