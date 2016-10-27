@@ -253,6 +253,24 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 	return result, err
 }
 
+func (m *Model) Exec(sqlStr string) (sql.Result, error) {
+	var err error
+	var stmt *sql.Stmt
+	if m.Tx == nil {
+		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
+	} else {
+		stmt, err = m.Tx.Prepare(sqlStr)
+	}
+	if err != nil {
+		fmt.Println("DBERR:", stmt, err, sqlStr)
+		return nil, err
+	}
+	result, err := stmt.Exec()
+	m.Clean()
+	return result, err
+}
+
 func GetLastInsertId(result sql.Result) (int64, error) {
 	return result.LastInsertId()
 }
