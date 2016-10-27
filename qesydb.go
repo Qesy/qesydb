@@ -31,7 +31,7 @@ func Connect(connStr string) {
 	sqlDb, err := sql.Open("mysql", connStr)
 	//defer sqlDb.Close()
 	sqlDb.SetConnMaxLifetime(1800)
-	sqlDb.SetMaxIdleConns(0) //400
+	sqlDb.SetMaxIdleConns(400)
 	sqlDb.SetMaxOpenConns(600)
 	if err != nil {
 		log.Fatal("mysql connect error")
@@ -85,7 +85,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	sqlStr := "SELECT " + field + " FROM " + m.Table + cond + sort + limit + ";"
 	m.Debug(sqlStr)
 	var err error
-	var stmt *sql.Stmt
+	/*var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
 	} else {
@@ -96,8 +96,14 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	if err != nil {
 		return resultsSlice, err
 	}
-	rows, err := stmt.Query()
-
+	rows, err := stmt.Query()*/
+	resultsSlice := []map[string]string{}
+	var rows *sql.Rows
+	if m.Tx == nil {
+		rows, err = Db.Query(sqlStr)
+	} else {
+		rows, err = m.Tx.Query(sqlStr)
+	}
 	if err != nil {
 		fmt.Println("DBERR:", err)
 		return resultsSlice, err
