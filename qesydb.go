@@ -31,7 +31,7 @@ func Connect(connStr string) {
 	sqlDb, err := sql.Open("mysql", connStr)
 	//defer sqlDb.Close()
 	sqlDb.SetConnMaxLifetime(1800)
-	sqlDb.SetMaxIdleConns(400)
+	sqlDb.SetMaxIdleConns(0) //400
 	sqlDb.SetMaxOpenConns(600)
 	if err != nil {
 		log.Fatal("mysql connect error")
@@ -99,7 +99,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	rows, err := stmt.Query()
 
 	if err != nil {
-		fmt.Println(sqlStr)
+		fmt.Println("DBERR:", err)
 		return resultsSlice, err
 	}
 	defer rows.Close()
