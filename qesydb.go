@@ -99,7 +99,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	}
 	rows, err := stmt.Query()
 	if err != nil {
-		fmt.Println("DBERR:", err)
+		fmt.Println("DBERR:", rows, err, sqlStr)
 		return resultsSlice, err
 	}
 	defer rows.Close()
@@ -182,6 +182,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	if err != nil {
+		fmt.Println("DBERR:", stmt, err, sqlStr)
 		return nil, err
 	}
 	result, err := stmt.Exec()
@@ -202,6 +203,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	if err != nil {
+		fmt.Println("DBERR:", stmt, err, sqlStr)
 		return nil, err
 	}
 	result, err := stmt.Exec()
@@ -222,6 +224,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	if err != nil {
+		fmt.Println("DBERR:", stmt, err, sqlStr)
 		return nil, err
 	}
 	result, err := stmt.Exec()
@@ -242,6 +245,7 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	if err != nil {
+		fmt.Println("DBERR:", stmt, err, sqlStr)
 		return nil, err
 	}
 	result, err := stmt.Exec()
