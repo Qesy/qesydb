@@ -85,9 +85,10 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	sqlStr := "SELECT " + field + " FROM " + m.Table + cond + sort + limit + ";"
 	m.Debug(sqlStr)
 	var err error
-	/*var stmt *sql.Stmt
+	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -96,14 +97,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	if err != nil {
 		return resultsSlice, err
 	}
-	rows, err := stmt.Query()*/
-	resultsSlice := []map[string]string{}
-	var rows *sql.Rows
-	if m.Tx == nil {
-		rows, err = Db.Query(sqlStr)
-	} else {
-		rows, err = m.Tx.Query(sqlStr)
-	}
+	rows, err := stmt.Query()
 	if err != nil {
 		fmt.Println("DBERR:", err)
 		return resultsSlice, err
@@ -183,10 +177,10 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-	//defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -203,10 +197,10 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-	//defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -223,10 +217,10 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-	//defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -243,10 +237,10 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
-	//defer stmt.Close()
 	if err != nil {
 		return nil, err
 	}
