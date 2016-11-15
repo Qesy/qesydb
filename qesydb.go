@@ -95,7 +95,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	//defer stmt.Close()
 	resultsSlice := []map[string]string{}
 	if err != nil {
-		return resultsSlice, err
+		return nil, err
 	}
 	rows, err := stmt.Query()
 	if err != nil {
