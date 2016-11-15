@@ -86,17 +86,18 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
+	resultsSlice := []map[string]string{}
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		if err != nil {
+			return resultsSlice, err
+		}
 		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	//defer stmt.Close()
-	resultsSlice := []map[string]string{}
-	if err != nil {
-		return nil, err
-	}
+
 	rows, err := stmt.Query()
 	if err != nil {
 		fmt.Println("DBERR:", rows, err, sqlStr)
