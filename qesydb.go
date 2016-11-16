@@ -98,6 +98,10 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
+		if err != nil {
+			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
+			return resultsSlice, err
+		}
 	}
 	//defer stmt.Close()
 
