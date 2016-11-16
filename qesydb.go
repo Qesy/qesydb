@@ -3,6 +3,7 @@ package QesyDb
 import (
 	"database/sql"
 	"fmt"
+	"github.com/Qesy/QesyGo"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"reflect"
@@ -12,6 +13,7 @@ import (
 )
 
 var Db *sql.DB
+var OpenLog int = 0
 
 type Model struct {
 	Cond   interface{}
@@ -90,6 +92,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
 		if err != nil {
+			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 			return resultsSlice, err
 		}
 		defer stmt.Close()
@@ -100,12 +103,13 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 
 	rows, err := stmt.Query()
 	if err != nil {
-		fmt.Println("DBERR:", rows, err, sqlStr)
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return resultsSlice, err
 	}
 	defer rows.Close()
 	fields, err := rows.Columns()
 	if err != nil {
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return resultsSlice, err
 	}
 
@@ -183,7 +187,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	if err != nil {
-		fmt.Println("DBERR:", stmt, err, sqlStr)
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
 	result, err := stmt.Exec()
@@ -204,7 +208,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	if err != nil {
-		fmt.Println("DBERR:", stmt, err, sqlStr)
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
 	result, err := stmt.Exec()
@@ -225,7 +229,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	if err != nil {
-		fmt.Println("DBERR:", stmt, err, sqlStr)
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
 	result, err := stmt.Exec()
@@ -246,7 +250,7 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	if err != nil {
-		fmt.Println("DBERR:", stmt, err, sqlStr)
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
 	result, err := stmt.Exec()
@@ -264,7 +268,7 @@ func (m *Model) Exec(sqlStr string) (sql.Result, error) {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
 	if err != nil {
-		fmt.Println("DBERR:", stmt, err, sqlStr)
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
 	result, err := stmt.Exec()
@@ -363,4 +367,11 @@ func (m *Model) Debug(sql string) {
 	if m.IsDeug == 1 {
 		fmt.Println(sql)
 	}
+}
+
+func logRecord(str string) {
+	if OpenLog == 0 {
+		return
+	}
+	QesyGo.Log(str, "error")
 }
