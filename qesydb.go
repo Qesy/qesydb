@@ -305,7 +305,9 @@ func (m *Model) getSQLCond() string {
 			if isStr, ok := v.(string); ok {
 				strArr = append(strArr, k+"='"+isStr+"'")
 			}
-			if isStrArr, ok := v.([]string); ok {
+			if isStrArrTmp, ok := v.([]string); ok {
+				isStrArr := make([]string, len(isStrArrTmp))
+				copy(isStrArr, isStrArrTmp)
 				for k, v := range isStrArr {
 					isStrArr[k] = "'" + v + "'"
 				}
