@@ -354,6 +354,9 @@ func (m *Model) getSQLLimite() string {
 	if strArr, ok := m.Limit.([2]int); ok {
 		return " LIMIT " + fmt.Sprintf("%d", strArr[0]) + ", " + fmt.Sprintf("%d", strArr[1])
 	}
+	if strArr, ok := m.Limit.([]int); ok {
+		return " LIMIT " + fmt.Sprintf("%d", strArr[0]) + ", " + fmt.Sprintf("%d", strArr[1])
+	}
 	return ""
 }
 
