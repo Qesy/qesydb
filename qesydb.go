@@ -91,11 +91,11 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	resultsSlice := []map[string]string{}
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 		if err != nil {
 			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 			return resultsSlice, err
 		}
-		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 		if err != nil {
@@ -106,11 +106,11 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	//defer stmt.Close()
 
 	rows, err := stmt.Query()
+	defer rows.Close()
 	if err != nil {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return resultsSlice, err
 	}
-	defer rows.Close()
 	fields, err := rows.Columns()
 	if err != nil {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
