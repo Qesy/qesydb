@@ -170,6 +170,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 }
 
 func (m *Model) ExecSelectOne() (map[string]string, error) {
+	m.SetLimit([2]int{0, 1})
 	resultsSlice, err := m.ExecSelect()
 	if len(resultsSlice) == 0 {
 		return map[string]string{}, err
