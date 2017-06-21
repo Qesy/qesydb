@@ -16,16 +16,17 @@ var Db *sql.DB
 var OpenLog int = 0
 
 type Model struct {
-	Cond   interface{}
-	Insert map[string]string
-	Update map[string]string
-	Field  string
-	Table  string
-	Index  string
-	Limit  interface{}
-	Sort   string
-	IsDeug int
-	Tx     *sql.Tx
+	Cond    interface{}
+	Insert  map[string]string
+	Update  map[string]string
+	Field   string
+	Table   string
+	Index   string
+	Limit   interface{}
+	Sort    string
+	GroupBy string
+	IsDeug  int
+	Tx      *sql.Tx
 }
 
 // Connect  is a method with a sql.
@@ -83,8 +84,9 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	cond := m.getSQLCond()
 	field := m.getSQLField()
 	sort := m.getSort()
+	groupby := m.getGroupBy()
 	limit := m.getSQLLimite()
-	sqlStr := "SELECT " + field + " FROM " + m.Table + cond + sort + limit + ";"
+	sqlStr := "SELECT " + field + " FROM " + m.Table + cond + groupby + sort + limit + ";"
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
@@ -343,6 +345,13 @@ func (m *Model) getSort() string {
 	return ""
 }
 
+func (m *Model) getGroupBy() string {
+	if m.GroupBy != "" {
+		return " GROUP BY " + m.GroupBy + " "
+	}
+	return ""
+}
+
 func (m *Model) getSQLUpdate() string {
 	var strArr []string
 	for k, v := range m.Update {
@@ -379,6 +388,7 @@ func (m *Model) Clean() {
 	m.Index = ""
 	m.Limit = nil
 	m.Sort = ""
+	m.GroupBy = ""
 	m.IsDeug = 0
 }
 
