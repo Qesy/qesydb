@@ -40,6 +40,11 @@ func (m *Model) SetSort(Sort string) *Model {
 	return m
 }
 
+func (m *Model) SetGroupBy(GroupBy string) *Model {
+	m.GroupBy = GroupBy
+	return m
+}
+
 func (m *Model) SetDebug(Debug int) *Model {
 	m.IsDeug = Debug
 	return m
