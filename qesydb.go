@@ -43,7 +43,7 @@ func Connect(connStr string) {
 	if err != nil {
 		log.Fatal("mysql ping error")
 	}
-	fmt.Println("mysql connect sueccss")
+	QesyGo.Println("mysql connect sueccss")
 	Db = sqlDb
 }
 
