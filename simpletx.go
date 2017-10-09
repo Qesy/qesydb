@@ -16,6 +16,10 @@ func InsertTx(TableName string, InsertArr map[string]string, m Model) (sql.Resul
 	return m.SetTable(TableName).SetInsert(InsertArr).ExecInsert()
 }
 
+func InsertBatchTx(TableName string, InsertArr []map[string]string, m Model) (sql.Result, error) {
+	return m.SetTable(TableName).SetInsertArr(InsertArr).ExecInsert()
+}
+
 func ReplaceTx(TableName string, InsertArr map[string]string, m Model) (sql.Result, error) {
 	return m.SetTable(TableName).SetInsert(InsertArr).ExecReplace()
 }

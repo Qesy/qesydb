@@ -15,6 +15,11 @@ func (m *Model) SetInsert(InsertMap map[string]string) *Model {
 	return m
 }
 
+func (m *Model) SetInsertArr(InsertMapArr []map[string]string) *Model {
+	m.InsertArr = InsertMapArr
+	return m
+}
+
 func (m *Model) SetUpdate(UpdateMap map[string]string) *Model {
 	m.Update = UpdateMap
 	return m

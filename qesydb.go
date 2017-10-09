@@ -16,17 +16,18 @@ var Db *sql.DB
 var OpenLog int = 0
 
 type Model struct {
-	Cond    interface{}
-	Insert  map[string]string
-	Update  map[string]string
-	Field   string
-	Table   string
-	Index   string
-	Limit   interface{}
-	Sort    string
-	GroupBy string
-	IsDeug  int
-	Tx      *sql.Tx
+	Cond      interface{}
+	Insert    map[string]string
+	InsertArr []map[string]string
+	Update    map[string]string
+	Field     string
+	Table     string
+	Index     string
+	Limit     interface{}
+	Sort      string
+	GroupBy   string
+	IsDeug    int
+	Tx        *sql.Tx
 }
 
 // Connect  is a method with a sql.
@@ -223,6 +224,27 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 	return result, err
 }
 
+func (m *Model) ExecInsertBatch() (sql.Result, error) {
+	insert := m.getSQLInsert()
+	sqlStr := "INSERT INTO " + m.Table + " " + insert + ";"
+	m.Debug(sqlStr)
+	var err error
+	var stmt *sql.Stmt
+	if m.Tx == nil {
+		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
+	} else {
+		stmt, err = m.Tx.Prepare(sqlStr)
+	}
+	if err != nil {
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
+		return nil, err
+	}
+	result, err := stmt.Exec()
+	m.Clean()
+	return result, err
+}
+
 func (m *Model) ExecReplace() (sql.Result, error) {
 	insert := m.getSQLInsert()
 	sqlStr := "REPLACE INTO " + m.Table + " " + insert + ";"
@@ -369,6 +391,20 @@ func (m *Model) getSQLInsert() string {
 	return "(" + strings.Join(fieldArr, ",") + ") values (" + strings.Join(valueArr, ",") + ")"
 }
 
+func (m *Model) getSQLInsertArr() string {
+	keys, values := "", ""
+	for _, value := range m.InsertArr {
+		var fieldArr, valueArr []string
+		for k, v := range value {
+			fieldArr = append(fieldArr, k)
+			valueArr = append(valueArr, "'"+v+"'")
+		}
+		keys = "(" + strings.Join(fieldArr, ",") + ")"
+		values += "(" + strings.Join(valueArr, ",") + ")"
+	}
+	return keys + " values " + values
+}
+
 func (m *Model) getSQLLimite() string {
 	if strArr, ok := m.Limit.([2]int); ok {
 		return " LIMIT " + fmt.Sprintf("%d", strArr[0]) + ", " + fmt.Sprintf("%d", strArr[1])
@@ -382,6 +418,7 @@ func (m *Model) getSQLLimite() string {
 func (m *Model) Clean() {
 	m.Cond = nil
 	m.Insert = nil
+	m.InsertArr = nil
 	m.Update = nil
 	m.Field = ""
 	m.Table = ""

@@ -24,6 +24,11 @@ func Insert(TableName string, InsertArr map[string]string) (sql.Result, error) {
 	return m.SetTable(TableName).SetInsert(InsertArr).ExecInsert()
 }
 
+func InsertBatch(TableName string, InsertArr []map[string]string) (sql.Result, error) {
+	var m Model
+	return m.SetTable(TableName).SetInsertArr(InsertArr).ExecInsert()
+}
+
 func Replace(TableName string, InsertArr map[string]string) (sql.Result, error) {
 	var m Model
 	return m.SetTable(TableName).SetInsert(InsertArr).ExecReplace()
