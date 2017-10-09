@@ -225,7 +225,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 }
 
 func (m *Model) ExecInsertBatch() (sql.Result, error) {
-	insert := m.getSQLInsert()
+	insert := m.getSQLInsertArr()
 	sqlStr := "INSERT INTO " + m.Table + " " + insert + ";"
 	m.Debug(sqlStr)
 	var err error
@@ -392,7 +392,7 @@ func (m *Model) getSQLInsert() string {
 }
 
 func (m *Model) getSQLInsertArr() string {
-	keys, values := "", ""
+	keys, values := "", []string{}
 	for _, value := range m.InsertArr {
 		var fieldArr, valueArr []string
 		for k, v := range value {
@@ -400,9 +400,9 @@ func (m *Model) getSQLInsertArr() string {
 			valueArr = append(valueArr, "'"+v+"'")
 		}
 		keys = "(" + strings.Join(fieldArr, ",") + ")"
-		values += "(" + strings.Join(valueArr, ",") + ")"
+		values = append(values, "("+strings.Join(valueArr, ",")+")")
 	}
-	return keys + " values " + values
+	return keys + " values " + strings.Join(values, ",")
 }
 
 func (m *Model) getSQLLimite() string {
