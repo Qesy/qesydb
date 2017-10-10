@@ -17,7 +17,7 @@ func InsertTx(TableName string, InsertArr map[string]string, m Model) (sql.Resul
 }
 
 func InsertBatchTx(TableName string, InsertArr []map[string]string, m Model) (sql.Result, error) {
-	return m.SetTable(TableName).SetInsertArr(InsertArr).ExecInsert()
+	return m.SetTable(TableName).SetInsertArr(InsertArr).ExecInsertBatch()
 }
 
 func ReplaceTx(TableName string, InsertArr map[string]string, m Model) (sql.Result, error) {

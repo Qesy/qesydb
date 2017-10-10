@@ -26,7 +26,7 @@ func Insert(TableName string, InsertArr map[string]string) (sql.Result, error) {
 
 func InsertBatch(TableName string, InsertArr []map[string]string) (sql.Result, error) {
 	var m Model
-	return m.SetTable(TableName).SetInsertArr(InsertArr).ExecInsert()
+	return m.SetTable(TableName).SetInsertArr(InsertArr).ExecInsertBatch()
 }
 
 func Replace(TableName string, InsertArr map[string]string) (sql.Result, error) {
