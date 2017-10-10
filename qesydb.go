@@ -392,17 +392,18 @@ func (m *Model) getSQLInsert() string {
 }
 
 func (m *Model) getSQLInsertArr() string {
-	keys, values := "", []string{}
-	for _, value := range m.InsertArr {
-		var fieldArr, valueArr []string
-		for k, v := range value {
-			fieldArr = append(fieldArr, k)
-			valueArr = append(valueArr, "'"+v+"'")
-		}
-		keys = "(" + strings.Join(fieldArr, ",") + ")"
-		values = append(values, "("+strings.Join(valueArr, ",")+")")
+	fieldArr, valuesArr := []string{}, []string{}
+	for k, _ := range m.InsertArr[0] {
+		fieldArr = append(fieldArr, k)
 	}
-	return keys + " values " + strings.Join(values, ",")
+	for _, value := range m.InsertArr {
+		var valueArr []string
+		for _, v := range fieldArr {
+			valueArr = append(valueArr, "'"+value[v]+"'")
+		}
+		valuesArr = append(valuesArr, "("+strings.Join(valueArr, ",")+")")
+	}
+	return "(" + strings.Join(fieldArr, ",") + ")" + " values " + strings.Join(valuesArr, ",")
 }
 
 func (m *Model) getSQLLimite() string {
