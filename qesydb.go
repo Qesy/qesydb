@@ -343,7 +343,7 @@ func (m *Model) getSQLCond() string {
 				}
 				strArr = append(strArr, k+" in ("+strings.Join(isStrArr, ",")+")")
 			} else {
-				panic("In must ([]string")
+				return "WHERE "
 			}
 		}
 		if len(strArr) == 0 {
