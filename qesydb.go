@@ -314,7 +314,7 @@ func GetRowsAffected(result sql.Result) (int64, error) {
 }
 
 func (m *Model) getSQLCond() string {
-	if str, ok := m.Cond.(string); ok {
+	if str, ok := m.Cond.(string); ok || m.Cond == nil {
 		return str
 	}
 	var strArr []string
@@ -345,7 +345,7 @@ func (m *Model) getSQLCond() string {
 		}
 		return " WHERE " + strings.Join(strArr, " && ")
 	}
-	return ""
+	return " WHERE "
 }
 
 func (m *Model) getSQLField() string {
