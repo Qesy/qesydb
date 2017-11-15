@@ -60,6 +60,91 @@ func Commit(tx *sql.Tx) error {
 	return tx.Commit()
 }
 
+func (m *Model) Query(sqlStr string) ([]map[string]string, error) {
+	m.Debug(sqlStr)
+	var err error
+	var stmt *sql.Stmt
+	resultsSlice := []map[string]string{}
+	if m.Tx == nil {
+		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
+		if err != nil {
+			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
+			return resultsSlice, err
+		}
+	} else {
+		stmt, err = m.Tx.Prepare(sqlStr)
+		if err != nil {
+			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
+			return resultsSlice, err
+		}
+	}
+	//defer stmt.Close()
+
+	rows, err := stmt.Query()
+	defer rows.Close()
+	if err != nil {
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
+		return resultsSlice, err
+	}
+	fields, err := rows.Columns()
+	if err != nil {
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
+		return resultsSlice, err
+	}
+
+	for rows.Next() {
+		result := make(map[string]string)
+		var scanResultContainers []interface{}
+		for i := 0; i < len(fields); i++ {
+			var scanResultContainer interface{}
+			scanResultContainers = append(scanResultContainers, &scanResultContainer)
+		}
+		if err := rows.Scan(scanResultContainers...); err != nil {
+			return resultsSlice, err
+		}
+		for k, v := range fields {
+			rawValue := reflect.Indirect(reflect.ValueOf(scanResultContainers[k]))
+			if rawValue.Interface() == nil {
+				continue
+			}
+			rawType := reflect.TypeOf(rawValue.Interface())
+			rawVal := reflect.ValueOf(rawValue.Interface())
+			var str string
+			switch rawType.Kind() {
+			case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				str = strconv.FormatInt(rawVal.Int(), 10)
+				result[v] = str
+			case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				str = strconv.FormatUint(rawVal.Uint(), 10)
+				result[v] = str
+			case reflect.Float32, reflect.Float64:
+				str = strconv.FormatFloat(rawVal.Float(), 'f', -1, 64)
+				result[v] = str
+			case reflect.Slice:
+				if rawType.Elem().Kind() == reflect.Uint8 {
+					result[v] = string(rawVal.Interface().([]byte))
+					break
+				}
+			case reflect.String:
+				str = rawVal.String()
+				result[v] = str
+			case reflect.Struct:
+				str = rawVal.Interface().(time.Time).Format("2006-01-02 15:04:05.000 -0700")
+				result[v] = str
+			case reflect.Bool:
+				if rawVal.Bool() {
+					result[v] = "1"
+				} else {
+					result[v] = "0"
+				}
+			}
+		}
+		resultsSlice = append(resultsSlice, result)
+	}
+	return resultsSlice, nil
+}
+
 // ExecSelectIndex  is a method with a sql.
 func (m *Model) ExecSelectIndex() (map[string]map[string]string, error) {
 	resultsSlice, _ := m.execSelect()
