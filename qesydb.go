@@ -35,8 +35,8 @@ func Connect(connStr string) {
 	sqlDb, err := sql.Open("mysql", connStr)
 	//defer sqlDb.Close()
 	sqlDb.SetConnMaxLifetime(3600)
-	sqlDb.SetMaxIdleConns(1000)
-	sqlDb.SetMaxOpenConns(2000)
+	sqlDb.SetMaxIdleConns(600)
+	sqlDb.SetMaxOpenConns(600)
 	if err != nil {
 		log.Fatal("mysql connect error")
 	}
@@ -46,6 +46,7 @@ func Connect(connStr string) {
 	}
 	QesyGo.Println("mysql connect sueccss")
 	Db = sqlDb
+	Db.
 }
 
 func Begin() (*sql.Tx, error) {
