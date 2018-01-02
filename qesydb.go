@@ -35,7 +35,7 @@ func Connect(connStr string) {
 	sqlDb, err := sql.Open("mysql", connStr)
 	//defer sqlDb.Close()
 	sqlDb.SetConnMaxLifetime(1800)
-	sqlDb.SetMaxIdleConns(600)
+	sqlDb.SetMaxIdleConns(0)
 	sqlDb.SetMaxOpenConns(600)
 	if err != nil {
 		log.Fatal("mysql connect error")
