@@ -113,9 +113,9 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -134,9 +134,9 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -155,9 +155,9 @@ func (m *Model) ExecInsertBatch() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -176,9 +176,9 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -197,9 +197,9 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -215,9 +215,9 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 func (m *Model) Exec(sqlStr string) (sql.Result, error) {
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -371,16 +371,21 @@ func (m *Model) query(sqlStr string) ([]map[string]string, error) {
 	var err error
 	var stmt *sql.Stmt
 	resultsSlice := []map[string]string{}
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+		defer stmt.Close()
+		if err != nil {
+			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
+			return resultsSlice, err
+		}
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
+		if err != nil {
+			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
+			return resultsSlice, err
+		}
 	}
-	if err != nil {
-		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
-		return resultsSlice, err
-	}
+	//defer stmt.Close()
 
 	rows, err := stmt.Query()
 	defer rows.Close()
