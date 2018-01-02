@@ -46,7 +46,6 @@ func Connect(connStr string) {
 	}
 	QesyGo.Println("mysql connect sueccss")
 	Db = sqlDb
-	Db.
 }
 
 func Begin() (*sql.Tx, error) {
