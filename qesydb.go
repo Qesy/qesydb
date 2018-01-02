@@ -34,9 +34,9 @@ type Model struct {
 func Connect(connStr string) {
 	sqlDb, err := sql.Open("mysql", connStr)
 	//defer sqlDb.Close()
-	sqlDb.SetConnMaxLifetime(1800)
-	sqlDb.SetMaxIdleConns(0)
-	sqlDb.SetMaxOpenConns(600)
+	sqlDb.SetConnMaxLifetime(3600)
+	sqlDb.SetMaxIdleConns(1000)
+	sqlDb.SetMaxOpenConns(2000)
 	if err != nil {
 		log.Fatal("mysql connect error")
 	}
