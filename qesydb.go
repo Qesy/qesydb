@@ -3,13 +3,14 @@ package QesyDb
 import (
 	"database/sql"
 	"fmt"
-	"github.com/Qesy/QesyGo"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Qesy/QesyGo"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var Db *sql.DB
@@ -44,7 +45,6 @@ func Connect(connStr string) {
 	if err != nil {
 		log.Fatal("mysql ping error")
 	}
-	QesyGo.Println("mysql connect sueccss")
 	Db = sqlDb
 }
 
