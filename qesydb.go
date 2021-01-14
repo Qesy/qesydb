@@ -277,7 +277,7 @@ func (m *Model) getSQLCond() string {
 				strArr = append(strArr, k+"='"+isStr+"'")
 			} else if isStrArrTmp, ok := v.([]string); ok {
 				isStrArr := make([]string, len(isStrArrTmp))
-				copy(isStrArr, isStrArrTmp)
+				//copy(isStrArr, isStrArrTmp)
 				for k, v := range isStrArr {
 					isStrArr[k] = "'" + v + "'"
 				}
@@ -400,12 +400,12 @@ func (m *Model) query(sqlStr string) ([]map[string]string, error) {
 		}
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
+		defer stmt.Close()
 		if err != nil {
 			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 			return resultsSlice, err
 		}
 	}
-	//defer stmt.Close()
 
 	rows, err := stmt.Query()
 	defer rows.Close()
