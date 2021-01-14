@@ -1,21 +1,24 @@
-package QesyDb
+package qesydb
 
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Qesy/QesyGo"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" //mysql 包
 )
 
+// Db 指针
 var Db *sql.DB
+
+// OpenLog 是否记录日志
 var OpenLog int = 0
 
+// Model 结构
 type Model struct {
 	Cond      interface{}
 	Insert    map[string]string
@@ -32,37 +35,40 @@ type Model struct {
 }
 
 // Connect  is a method with a sql.
-func Connect(connStr string) {
-	sqlDb, err := sql.Open("mysql", connStr)
-	//defer sqlDb.Close()
-	sqlDb.SetConnMaxLifetime(3600)
-	sqlDb.SetMaxIdleConns(0)
-	sqlDb.SetMaxOpenConns(600)
-	if err != nil {
-		log.Fatal("mysql connect error")
+func Connect(connStr string) error {
+	if sqlDb, err := sql.Open("mysql", connStr); err == nil {
+		//defer sqlDb.Close()
+		sqlDb.SetConnMaxLifetime(3600)
+		sqlDb.SetMaxIdleConns(0)
+		sqlDb.SetMaxOpenConns(600)
+		if err = sqlDb.Ping(); err != nil {
+			return err
+		}
+		Db = sqlDb
+	} else {
+		return err
 	}
-	err = sqlDb.Ping()
-	if err != nil {
-		log.Fatal("mysql ping error")
-	}
-	Db = sqlDb
+	return nil
 }
 
+// Begin 开始事务
 func Begin() (*sql.Tx, error) {
 	return Db.Begin()
 }
 
+// Rollback 事务回滚
 func Rollback(tx *sql.Tx) error {
 	return tx.Rollback()
 }
 
+// Commit 事务提交
 func Commit(tx *sql.Tx) error {
 	return tx.Commit()
 }
 
-// ExecSelectIndex  is a method with a sql.
+// ExecSelectIndex 返回一个MAP
 func (m *Model) ExecSelectIndex() (map[string]map[string]string, error) {
-	resultsSlice, _ := m.execSelect()
+	resultsSlice, err := m.execSelect()
 	retArr := map[string]map[string]string{}
 	for _, v := range resultsSlice {
 		if v[m.Index] == "" {
@@ -71,22 +77,25 @@ func (m *Model) ExecSelectIndex() (map[string]map[string]string, error) {
 		retArr[v[m.Index]] = v
 	}
 	m.Clean()
-	return retArr, nil
+	return retArr, err
 }
 
-func (m *Model) Query(SqlStr string) ([]map[string]string, error) {
-	ret, err := m.query(SqlStr)
+// Query 查询SQL,返回一个 切片MAP;
+//SqlStr : SQL语句
+func (m *Model) Query(sqlStr string) ([]map[string]string, error) {
+	ret, err := m.query(sqlStr)
 	m.Clean()
 	return ret, err
 }
 
+// ExecSelect 执行查询 返回一个 切片MAP
 func (m *Model) ExecSelect() ([]map[string]string, error) {
 	ret, err := m.execSelect()
 	m.Clean()
 	return ret, err
 }
 
-// ExecSelect is a method with a sql.
+// ExecSelect 拼装SQL语句
 func (m *Model) execSelect() ([]map[string]string, error) {
 	cond := m.getSQLCond()
 	field := m.getSQLField()
@@ -97,6 +106,7 @@ func (m *Model) execSelect() ([]map[string]string, error) {
 	return m.query(sqlStr)
 }
 
+// ExecSelectOne 只查询一条
 func (m *Model) ExecSelectOne() (map[string]string, error) {
 	m.SetLimit([2]int{0, 1})
 	resultsSlice, err := m.ExecSelect()
@@ -106,6 +116,7 @@ func (m *Model) ExecSelectOne() (map[string]string, error) {
 	return resultsSlice[0], nil
 }
 
+// ExecUpdate 修改
 func (m *Model) ExecUpdate() (sql.Result, error) {
 	updateStr := m.getSQLUpdate()
 	condStr := m.getSQLCond()
@@ -128,6 +139,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 	return result, err
 }
 
+// ExecInsert 添加
 func (m *Model) ExecInsert() (sql.Result, error) {
 	insert := m.getSQLInsert()
 	sqlStr := "INSERT INTO " + m.Table + " " + insert + ";"
@@ -149,6 +161,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 	return result, err
 }
 
+// ExecInsertBatch 批量添加 （预计要删除）
 func (m *Model) ExecInsertBatch() (sql.Result, error) {
 	insert := m.getSQLInsertArr()
 	sqlStr := "INSERT INTO " + m.Table + " " + insert + ";"
@@ -170,6 +183,7 @@ func (m *Model) ExecInsertBatch() (sql.Result, error) {
 	return result, err
 }
 
+// ExecReplace 替换
 func (m *Model) ExecReplace() (sql.Result, error) {
 	insert := m.getSQLInsert()
 	sqlStr := "REPLACE INTO " + m.Table + " " + insert + ";"
@@ -191,6 +205,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 	return result, err
 }
 
+// ExecDelete 删除
 func (m *Model) ExecDelete() (sql.Result, error) {
 	condStr := m.getSQLCond()
 	sqlStr := "DELETE FROM " + m.Table + condStr + ";"
@@ -212,6 +227,7 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 	return result, err
 }
 
+// Exec 执行SQL语句
 func (m *Model) Exec(sqlStr string) (sql.Result, error) {
 	var err error
 	var stmt *sql.Stmt
@@ -230,10 +246,12 @@ func (m *Model) Exec(sqlStr string) (sql.Result, error) {
 	return result, err
 }
 
-func GetLastInsertId(result sql.Result) (int64, error) {
+// GetLastInsertID 获取最后插入的ID
+func GetLastInsertID(result sql.Result) (int64, error) {
 	return result.LastInsertId()
 }
 
+// GetRowsAffected 获取受影响行数
 func GetRowsAffected(result sql.Result) (int64, error) {
 	return result.RowsAffected()
 }
@@ -316,7 +334,7 @@ func (m *Model) getSQLInsert() string {
 
 func (m *Model) getSQLInsertArr() string {
 	fieldArr, valuesArr := []string{}, []string{}
-	for k, _ := range m.InsertArr[0] {
+	for k := range m.InsertArr[0] {
 		fieldArr = append(fieldArr, k)
 	}
 	for _, value := range m.InsertArr {
@@ -339,6 +357,7 @@ func (m *Model) getSQLLimite() string {
 	return ""
 }
 
+// Clean 清楚orm
 func (m *Model) Clean() {
 	m.Cond = nil
 	m.Insert = nil
@@ -353,6 +372,7 @@ func (m *Model) Clean() {
 	m.IsDeug = 0
 }
 
+// Debug 打印调试
 func (m *Model) Debug(sql string) {
 	if m.IsDeug == 1 {
 		fmt.Println(sql)
