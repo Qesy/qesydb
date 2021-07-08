@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Qesy/QesyGo"
+	"github.com/Qesy/qesygo"
 	_ "github.com/go-sql-driver/mysql" //mysql 包
 )
 
@@ -276,15 +276,12 @@ func (m *Model) getSQLCond() string {
 			if isStr, ok := v.(string); ok {
 				strArr = append(strArr, k+"='"+isStr+"'")
 			} else if isStrArrTmp, ok := v.([]string); ok {
-				isStrArr := make([]string, len(isStrArrTmp))
-				//copy(isStrArr, isStrArrTmp)
-				for k, v := range isStrArr {
-					isStrArr[k] = "'" + v + "'"
+				if len(isStrArrTmp) == 0 {
+					strArr = append(strArr, k+"=''")
+				} else {
+					strArr = append(strArr, k+" in ("+strings.Join(isStrArrTmp, ",")+")")
 				}
-				if len(isStrArr) == 0 {
-					continue
-				}
-				strArr = append(strArr, k+" in ("+strings.Join(isStrArr, ",")+")")
+
 			} else {
 				return "WHERE "
 			}
@@ -383,7 +380,7 @@ func logRecord(str string) {
 	if OpenLog == 0 {
 		return
 	}
-	QesyGo.Log(str, "error")
+	qesygo.Log(str, "error")
 }
 
 func (m *Model) query(sqlStr string) ([]map[string]string, error) {
