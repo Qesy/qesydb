@@ -262,6 +262,9 @@ func (m *Model) getSQLCond() string {
 	}
 	var strArr []string
 	if arr, ok := m.Cond.(map[string]string); ok {
+		if len(arr) == 0 {
+			return ""
+		}
 		var strArr []string
 		for k, v := range arr {
 			strArr = append(strArr, k+"='"+v+"'")
@@ -272,6 +275,9 @@ func (m *Model) getSQLCond() string {
 		return " WHERE " + strings.Join(strArr, " && ")
 	}
 	if arr, ok := m.Cond.(map[string]interface{}); ok {
+		if len(arr) == 0 {
+			return ""
+		}
 		for k, v := range arr {
 			if isStr, ok := v.(string); ok {
 				strArr = append(strArr, k+"='"+isStr+"'")
@@ -279,7 +285,7 @@ func (m *Model) getSQLCond() string {
 				if len(isStrArrTmp) == 0 {
 					strArr = append(strArr, k+"=''")
 				} else {
-					strArr = append(strArr, k+" in ("+strings.Join(isStrArrTmp, ",")+")")
+					strArr = append(strArr, k+" in ('"+strings.Join(isStrArrTmp, "', '")+"')")
 				}
 
 			} else {
