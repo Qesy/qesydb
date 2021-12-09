@@ -267,7 +267,14 @@ func (m *Model) getSQLCond() string {
 		}
 		var strArr []string
 		for k, v := range arr {
-			strArr = append(strArr, k+"='"+v+"'")
+			if strings.Index(k, "LIKE") != -1 {
+				strArr = append(strArr, k+" '%"+v+"%'")
+			} else if strings.Index(k, ">") != -1 || strings.Index(k, "<") != -1 {
+				strArr = append(strArr, k+" "+v)
+			} else {
+				strArr = append(strArr, k+"='"+v+"'")
+			}
+
 		}
 		if len(strArr) == 0 {
 			return ""
@@ -280,7 +287,14 @@ func (m *Model) getSQLCond() string {
 		}
 		for k, v := range arr {
 			if isStr, ok := v.(string); ok {
-				strArr = append(strArr, k+"='"+isStr+"'")
+				if strings.Index(k, "LIKE") != -1 {
+					strArr = append(strArr, k+" '%"+isStr+"%'")
+				} else if strings.Index(k, ">") != -1 || strings.Index(k, "<") != -1 {
+					strArr = append(strArr, k+" "+isStr)
+				} else {
+					strArr = append(strArr, k+"='"+isStr+"'")
+				}
+
 			} else if isStrArrTmp, ok := v.([]string); ok {
 				if len(isStrArrTmp) == 0 {
 					strArr = append(strArr, k+"=''")
