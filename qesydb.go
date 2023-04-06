@@ -3,12 +3,12 @@ package qesydb
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/Qesy/qesygo"
 	_ "github.com/go-sql-driver/mysql" //mysql 包
 )
 
@@ -81,7 +81,7 @@ func (m *Model) ExecSelectIndex() (map[string]map[string]string, error) {
 }
 
 // Query 查询SQL,返回一个 切片MAP;
-//SqlStr : SQL语句
+// SqlStr : SQL语句
 func (m *Model) Query(sqlStr string) ([]map[string]string, error) {
 	ret, err := m.query(sqlStr)
 	m.Clean()
@@ -126,7 +126,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
-		defer stmt.Close()
+
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -134,6 +134,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -148,7 +149,6 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
-		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -156,6 +156,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -170,7 +171,6 @@ func (m *Model) ExecInsertBatch() (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
-		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -178,6 +178,7 @@ func (m *Model) ExecInsertBatch() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -192,7 +193,6 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
-		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -200,6 +200,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -214,7 +215,6 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
-		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -222,6 +222,7 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -233,7 +234,6 @@ func (m *Model) Exec(sqlStr string) (sql.Result, error) {
 	var stmt *sql.Stmt
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
-		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -241,6 +241,7 @@ func (m *Model) Exec(sqlStr string) (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -267,9 +268,9 @@ func (m *Model) getSQLCond() string {
 		}
 		var strArr []string
 		for k, v := range arr {
-			if strings.Index(k, "LIKE") != -1 {
+			if strings.Contains(k, "LIKE") {
 				strArr = append(strArr, k+" '%"+v+"%'")
-			} else if strings.Index(k, ">") != -1 || strings.Index(k, "<") != -1 {
+			} else if strings.Contains(k, ">") || strings.Contains(k, "<") {
 				strArr = append(strArr, k+" "+v)
 			} else {
 				strArr = append(strArr, k+"='"+v+"'")
@@ -287,9 +288,9 @@ func (m *Model) getSQLCond() string {
 		}
 		for k, v := range arr {
 			if isStr, ok := v.(string); ok {
-				if strings.Index(k, "LIKE") != -1 {
+				if strings.Contains(k, "LIKE") {
 					strArr = append(strArr, k+" '%"+isStr+"%'")
-				} else if strings.Index(k, ">") != -1 || strings.Index(k, "<") != -1 {
+				} else if strings.Contains(k, ">") || strings.Contains(k, "<") {
 					strArr = append(strArr, k+" "+isStr)
 				} else {
 					strArr = append(strArr, k+"='"+isStr+"'")
@@ -400,7 +401,7 @@ func logRecord(str string) {
 	if OpenLog == 0 {
 		return
 	}
-	qesygo.Log(str, "error")
+	log.Println(str)
 }
 
 func (m *Model) query(sqlStr string) ([]map[string]string, error) {
@@ -410,26 +411,26 @@ func (m *Model) query(sqlStr string) ([]map[string]string, error) {
 	resultsSlice := []map[string]string{}
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
-		defer stmt.Close()
 		if err != nil {
 			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 			return resultsSlice, err
 		}
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
-		defer stmt.Close()
 		if err != nil {
 			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 			return resultsSlice, err
 		}
+		defer stmt.Close()
 	}
 
 	rows, err := stmt.Query()
-	defer rows.Close()
 	if err != nil {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return resultsSlice, err
 	}
+	defer rows.Close()
 	fields, err := rows.Columns()
 	if err != nil {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
@@ -467,7 +468,6 @@ func (m *Model) query(sqlStr string) ([]map[string]string, error) {
 			case reflect.Slice:
 				if rawType.Elem().Kind() == reflect.Uint8 {
 					result[v] = string(rawVal.Interface().([]byte))
-					break
 				}
 			case reflect.String:
 				str = rawVal.String()
