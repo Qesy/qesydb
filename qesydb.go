@@ -40,8 +40,8 @@ func Connect(connStr string) error {
 		//defer sqlDb.Close()
 		sqlDb.SetMaxOpenConns(600)
 		sqlDb.SetMaxIdleConns(300)
-		sqlDb.SetConnMaxLifetime(0)
-		sqlDb.SetConnMaxIdleTime(4 * time.Second)
+		sqlDb.SetConnMaxLifetime(3600)
+		//sqlDb.SetConnMaxIdleTime(4 * time.Second)
 
 		if err = sqlDb.Ping(); err != nil {
 			return err
