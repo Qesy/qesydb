@@ -39,8 +39,8 @@ func Connect(connStr string) error {
 	if sqlDb, err := sql.Open("mysql", connStr); err == nil {
 		//defer sqlDb.Close()
 		sqlDb.SetMaxOpenConns(600)
-		sqlDb.SetMaxIdleConns(300)
-		sqlDb.SetConnMaxLifetime(3600)
+		sqlDb.SetMaxIdleConns(600)
+		sqlDb.SetConnMaxLifetime(time.Minute * 3)
 		//sqlDb.SetConnMaxIdleTime(4 * time.Second)
 
 		if err = sqlDb.Ping(); err != nil {
