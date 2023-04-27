@@ -16,7 +16,12 @@ import (
 var Db *sql.DB
 
 // OpenLog 是否记录日志
-var OpenLog int = 0
+var (
+	OpenLog         int           = 0
+	MaxOpenConns    int           = 600
+	MaxIdleConns    int           = 600
+	ConnMaxLifetime time.Duration = time.Minute * 3
+)
 
 // Model 结构
 type Model struct {
@@ -38,9 +43,9 @@ type Model struct {
 func Connect(connStr string) error {
 	if sqlDb, err := sql.Open("mysql", connStr); err == nil {
 		//defer sqlDb.Close()
-		sqlDb.SetMaxOpenConns(600)
-		sqlDb.SetMaxIdleConns(600)
-		sqlDb.SetConnMaxLifetime(time.Minute * 3)
+		sqlDb.SetMaxOpenConns(MaxOpenConns)
+		sqlDb.SetMaxIdleConns(MaxIdleConns)
+		sqlDb.SetConnMaxLifetime(ConnMaxLifetime)
 		//sqlDb.SetConnMaxIdleTime(4 * time.Second)
 
 		if err = sqlDb.Ping(); err != nil {
