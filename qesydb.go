@@ -131,9 +131,9 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
+
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 	}
@@ -141,6 +141,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -153,7 +154,6 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
 	} else {
@@ -163,6 +163,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -175,7 +176,6 @@ func (m *Model) ExecInsertBatch() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
 	} else {
@@ -185,6 +185,7 @@ func (m *Model) ExecInsertBatch() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -197,7 +198,6 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
 	} else {
@@ -207,6 +207,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -219,7 +220,6 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
 	} else {
@@ -229,6 +229,7 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -238,7 +239,6 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 func (m *Model) Exec(sqlStr string) (sql.Result, error) {
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
 	} else {
@@ -248,6 +248,7 @@ func (m *Model) Exec(sqlStr string) (sql.Result, error) {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return nil, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec()
 	m.Clean()
 	return result, err
@@ -414,7 +415,6 @@ func (m *Model) query(sqlStr string) ([]map[string]string, error) {
 	m.Debug(sqlStr)
 	var err error
 	var stmt *sql.Stmt
-	defer stmt.Close()
 	resultsSlice := []map[string]string{}
 	if m.Tx == nil {
 		stmt, err = Db.Prepare(sqlStr)
@@ -422,20 +422,22 @@ func (m *Model) query(sqlStr string) ([]map[string]string, error) {
 			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 			return resultsSlice, err
 		}
+		defer stmt.Close()
 	} else {
 		stmt, err = m.Tx.Prepare(sqlStr)
 		if err != nil {
 			logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 			return resultsSlice, err
 		}
+		defer stmt.Close()
 	}
+
 	rows, err := stmt.Query()
-	defer rows.Close()
 	if err != nil {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return resultsSlice, err
 	}
-
+	defer rows.Close()
 	fields, err := rows.Columns()
 	if err != nil {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
