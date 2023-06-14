@@ -457,6 +457,7 @@ func (m *Model) query(sqlStr string) ([]map[string]string, error) {
 		for k, v := range fields {
 			rawValue := reflect.Indirect(reflect.ValueOf(scanResultContainers[k]))
 			if rawValue.Interface() == nil {
+				result[v] = ""
 				continue
 			}
 			rawType := reflect.TypeOf(rawValue.Interface())
