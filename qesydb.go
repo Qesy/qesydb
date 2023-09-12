@@ -105,10 +105,10 @@ func (m *Model) ExecSelect() ([]map[string]string, error) {
 
 // ExecSelect 拼装SQL语句
 func (m *Model) execSelect() ([]map[string]string, error) {
-	cond := m.getSQLCond()
 	field := m.getSQLField()
-	sort := m.getSort()
+	cond := m.getSQLCond()
 	groupby := m.getGroupBy()
+	sort := m.getSort()
 	limit := m.getSQLLimite()
 	sqlStr := "SELECT " + field + " FROM " + m.Table + cond + groupby + sort + limit + ";"
 	return m.query(sqlStr)
