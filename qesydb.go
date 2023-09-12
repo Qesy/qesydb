@@ -267,14 +267,17 @@ func GetRowsAffected(result sql.Result) (int64, error) {
 
 func (m *Model) getSQLCond() string {
 	if str, ok := m.Cond.(string); ok || m.Cond == nil {
-		return " " + str + " "
+		if str == "" {
+			return str
+		}
+		return " WHERE " + str + " "
 	}
 	var strArr []string
 	if arr, ok := m.Cond.(map[string]string); ok {
 		for k, v := range arr {
 			m.Scan = append(m.Scan, v)
 			if strings.Contains(k, "LIKE") {
-				strArr = append(strArr, k+" '%?%'")
+				strArr = append(strArr, k+" ?")
 			} else if strings.Contains(k, ">") || strings.Contains(k, "<") {
 				strArr = append(strArr, k+" ?")
 			} else {
@@ -286,7 +289,7 @@ func (m *Model) getSQLCond() string {
 			if _, ok := v.(string); ok {
 				m.Scan = append(m.Scan, v)
 				if strings.Contains(k, "LIKE") {
-					strArr = append(strArr, k+" '%?%'")
+					strArr = append(strArr, k+" ?")
 				} else if strings.Contains(k, ">") || strings.Contains(k, "<") {
 					strArr = append(strArr, k+" ?")
 				} else {
@@ -320,17 +323,15 @@ func (m *Model) getSQLField() string {
 }
 
 func (m *Model) getSort() string {
-	if m.Sort != "" {
-		m.Scan = append(m.Scan, m.Sort)
-		return " ORDER BY ? "
+	if m.GroupBy != "" {
+		return " GROUP BY " + m.GroupBy + " "
 	}
 	return ""
 }
 
 func (m *Model) getGroupBy() string {
 	if m.GroupBy != "" {
-		m.Scan = append(m.Scan, m.GroupBy)
-		return " GROUP BY ? "
+		return " GROUP BY " + m.GroupBy + " "
 	}
 	return ""
 }
