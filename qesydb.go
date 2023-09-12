@@ -396,7 +396,7 @@ func (m *Model) Clean() {
 // Debug 打印调试
 func (m *Model) Debug(sql string) {
 	if m.IsDeug == 1 {
-		fmt.Println(sql)
+		fmt.Println(sql, m.Scan)
 	}
 }
 
