@@ -278,7 +278,7 @@ func (m *Model) getSQLCond() string {
 			} else if strings.Contains(k, ">") || strings.Contains(k, "<") {
 				strArr = append(strArr, k+" ?")
 			} else {
-				strArr = append(strArr, k+"='?'")
+				strArr = append(strArr, k+"=?")
 			}
 		}
 	} else if arr, ok := m.Cond.(map[string]interface{}); ok {
@@ -290,16 +290,16 @@ func (m *Model) getSQLCond() string {
 				} else if strings.Contains(k, ">") || strings.Contains(k, "<") {
 					strArr = append(strArr, k+" ?")
 				} else {
-					strArr = append(strArr, k+"='?'")
+					strArr = append(strArr, k+"=?")
 				}
 
 			} else if isStrArrTmp, ok := v.([]string); ok {
 				if len(isStrArrTmp) == 0 {
 					m.Scan = append(m.Scan, "")
-					strArr = append(strArr, k+"=''")
+					strArr = append(strArr, k+"=?")
 				} else {
 					m.Scan = append(m.Scan, strings.Join(isStrArrTmp, "', '"))
-					strArr = append(strArr, k+" in ('?')")
+					strArr = append(strArr, k+" in (?)")
 				}
 			}
 		}
@@ -336,7 +336,7 @@ func (m *Model) getSQLUpdate() string {
 	var strArr []string
 	for k, v := range m.Update {
 		m.Scan = append(m.Scan, v)
-		strArr = append(strArr, k+"='?'")
+		strArr = append(strArr, k+"=?")
 	}
 	return strings.Join(strArr, ",")
 }
