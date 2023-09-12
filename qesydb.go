@@ -37,6 +37,7 @@ type Model struct {
 	GroupBy   string
 	IsDeug    int
 	Tx        *sql.Tx
+	Scan      []interface{}
 }
 
 // Connect  is a method with a sql.
@@ -142,7 +143,7 @@ func (m *Model) ExecUpdate() (sql.Result, error) {
 		return nil, err
 	}
 	defer stmt.Close()
-	result, err := stmt.Exec()
+	result, err := stmt.Exec(m.Scan...)
 	m.Clean()
 	return result, err
 }
@@ -164,7 +165,7 @@ func (m *Model) ExecInsert() (sql.Result, error) {
 		return nil, err
 	}
 	defer stmt.Close()
-	result, err := stmt.Exec()
+	result, err := stmt.Exec(m.Scan...)
 	m.Clean()
 	return result, err
 }
@@ -186,7 +187,7 @@ func (m *Model) ExecInsertBatch() (sql.Result, error) {
 		return nil, err
 	}
 	defer stmt.Close()
-	result, err := stmt.Exec()
+	result, err := stmt.Exec(m.Scan...)
 	m.Clean()
 	return result, err
 }
@@ -208,7 +209,7 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 		return nil, err
 	}
 	defer stmt.Close()
-	result, err := stmt.Exec()
+	result, err := stmt.Exec(m.Scan...)
 	m.Clean()
 	return result, err
 }
@@ -230,7 +231,7 @@ func (m *Model) ExecDelete() (sql.Result, error) {
 		return nil, err
 	}
 	defer stmt.Close()
-	result, err := stmt.Exec()
+	result, err := stmt.Exec(m.Scan...)
 	m.Clean()
 	return result, err
 }
@@ -249,7 +250,7 @@ func (m *Model) Exec(sqlStr string) (sql.Result, error) {
 		return nil, err
 	}
 	defer stmt.Close()
-	result, err := stmt.Exec()
+	result, err := stmt.Exec(m.Scan...)
 	m.Clean()
 	return result, err
 }
@@ -270,72 +271,63 @@ func (m *Model) getSQLCond() string {
 	}
 	var strArr []string
 	if arr, ok := m.Cond.(map[string]string); ok {
-		if len(arr) == 0 {
-			return ""
-		}
-		var strArr []string
 		for k, v := range arr {
+			m.Scan = append(m.Scan, v)
 			if strings.Contains(k, "LIKE") {
-				strArr = append(strArr, k+" '%"+v+"%'")
+				strArr = append(strArr, k+" '%?%'")
 			} else if strings.Contains(k, ">") || strings.Contains(k, "<") {
-				strArr = append(strArr, k+" "+v)
+				strArr = append(strArr, k+" ?")
 			} else {
-				strArr = append(strArr, k+"='"+v+"'")
+				strArr = append(strArr, k+"='?'")
 			}
-
 		}
-		if len(strArr) == 0 {
-			return ""
-		}
-		return " WHERE " + strings.Join(strArr, " && ")
-	}
-	if arr, ok := m.Cond.(map[string]interface{}); ok {
-		if len(arr) == 0 {
-			return ""
-		}
+	} else if arr, ok := m.Cond.(map[string]interface{}); ok {
 		for k, v := range arr {
-			if isStr, ok := v.(string); ok {
+			if _, ok := v.(string); ok {
+				m.Scan = append(m.Scan, v)
 				if strings.Contains(k, "LIKE") {
-					strArr = append(strArr, k+" '%"+isStr+"%'")
+					strArr = append(strArr, k+" '%?%'")
 				} else if strings.Contains(k, ">") || strings.Contains(k, "<") {
-					strArr = append(strArr, k+" "+isStr)
+					strArr = append(strArr, k+" ?")
 				} else {
-					strArr = append(strArr, k+"='"+isStr+"'")
+					strArr = append(strArr, k+"='?'")
 				}
 
 			} else if isStrArrTmp, ok := v.([]string); ok {
 				if len(isStrArrTmp) == 0 {
+					m.Scan = append(m.Scan, "")
 					strArr = append(strArr, k+"=''")
 				} else {
-					strArr = append(strArr, k+" in ('"+strings.Join(isStrArrTmp, "', '")+"')")
+					m.Scan = append(m.Scan, strings.Join(isStrArrTmp, "', '"))
+					strArr = append(strArr, k+" in ('?')")
 				}
-
-			} else {
-				return "WHERE "
 			}
 		}
-		return " WHERE " + strings.Join(strArr, " && ")
 	}
-	return " WHERE "
+	return " WHERE " + strings.Join(strArr, " && ")
 }
 
 func (m *Model) getSQLField() string {
+	Field := "*"
 	if m.Field != "" {
-		return m.Field
+		Field = m.Field
 	}
-	return "*"
+	m.Scan = append(m.Scan, Field)
+	return "?"
 }
 
 func (m *Model) getSort() string {
 	if m.Sort != "" {
-		return " ORDER BY " + m.Sort + " "
+		m.Scan = append(m.Scan, m.Sort)
+		return " ORDER BY ? "
 	}
 	return ""
 }
 
 func (m *Model) getGroupBy() string {
 	if m.GroupBy != "" {
-		return " GROUP BY " + m.GroupBy + " "
+		m.Scan = append(m.Scan, m.GroupBy)
+		return " GROUP BY ? "
 	}
 	return ""
 }
@@ -343,7 +335,8 @@ func (m *Model) getGroupBy() string {
 func (m *Model) getSQLUpdate() string {
 	var strArr []string
 	for k, v := range m.Update {
-		strArr = append(strArr, k+"='"+v+"'")
+		m.Scan = append(m.Scan, v)
+		strArr = append(strArr, k+"='?'")
 	}
 	return strings.Join(strArr, ",")
 }
@@ -351,8 +344,9 @@ func (m *Model) getSQLUpdate() string {
 func (m *Model) getSQLInsert() string {
 	var fieldArr, valueArr []string
 	for k, v := range m.Insert {
+		m.Scan = append(m.Scan, v)
 		fieldArr = append(fieldArr, k)
-		valueArr = append(valueArr, "'"+v+"'")
+		valueArr = append(valueArr, "?")
 	}
 	return "(" + strings.Join(fieldArr, ",") + ") values (" + strings.Join(valueArr, ",") + ")"
 }
@@ -365,7 +359,8 @@ func (m *Model) getSQLInsertArr() string {
 	for _, value := range m.InsertArr {
 		var valueArr []string
 		for _, v := range fieldArr {
-			valueArr = append(valueArr, "'"+value[v]+"'")
+			m.Scan = append(m.Scan, value[v])
+			valueArr = append(valueArr, "?")
 		}
 		valuesArr = append(valuesArr, "("+strings.Join(valueArr, ",")+")")
 	}
@@ -395,6 +390,7 @@ func (m *Model) Clean() {
 	m.Sort = ""
 	m.GroupBy = ""
 	m.IsDeug = 0
+	m.Scan = []interface{}{}
 }
 
 // Debug 打印调试
@@ -432,7 +428,7 @@ func (m *Model) query(sqlStr string) ([]map[string]string, error) {
 		defer stmt.Close()
 	}
 
-	rows, err := stmt.Query()
+	rows, err := stmt.Query(m.Scan...)
 	if err != nil {
 		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
 		return resultsSlice, err
