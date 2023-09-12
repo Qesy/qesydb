@@ -267,7 +267,7 @@ func GetRowsAffected(result sql.Result) (int64, error) {
 
 func (m *Model) getSQLCond() string {
 	if str, ok := m.Cond.(string); ok || m.Cond == nil {
-		return str
+		return " " + str + " "
 	}
 	var strArr []string
 	if arr, ok := m.Cond.(map[string]string); ok {
