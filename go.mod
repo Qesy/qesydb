@@ -1,4 +1,4 @@
-module qesydb
+module github.com/Qesy/qesydb
 
 go 1.20
 
