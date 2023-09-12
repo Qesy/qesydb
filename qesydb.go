@@ -298,8 +298,12 @@ func (m *Model) getSQLCond() string {
 					m.Scan = append(m.Scan, "")
 					strArr = append(strArr, k+"=?")
 				} else {
-					m.Scan = append(m.Scan, strings.Join(isStrArrTmp, "', '"))
-					strArr = append(strArr, k+" in (?)")
+					SqlIn := []string{}
+					for _, sv := range isStrArrTmp {
+						m.Scan = append(m.Scan, sv)
+						SqlIn = append(SqlIn, "?")
+					}
+					strArr = append(strArr, k+" in ("+strings.Join(SqlIn, ",")+")")
 				}
 			}
 		}
@@ -312,8 +316,7 @@ func (m *Model) getSQLField() string {
 	if m.Field != "" {
 		Field = m.Field
 	}
-	m.Scan = append(m.Scan, Field)
-	return "?"
+	return Field
 }
 
 func (m *Model) getSort() string {
