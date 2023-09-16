@@ -349,7 +349,7 @@ func (m *Model) getSQLInsert() string {
 	var fieldArr, valueArr []string
 	for k, v := range m.Insert {
 		m.Scan = append(m.Scan, v)
-		fieldArr = append(fieldArr, k)
+		fieldArr = append(fieldArr, "`"+k+"`")
 		valueArr = append(valueArr, "?")
 	}
 	return "(" + strings.Join(fieldArr, ",") + ") values (" + strings.Join(valueArr, ",") + ")"
