@@ -323,8 +323,8 @@ func (m *Model) getSQLField() string {
 }
 
 func (m *Model) getSort() string {
-	if m.GroupBy != "" {
-		return " GROUP BY " + m.GroupBy + " "
+	if m.Sort != "" {
+		return " GROUP BY " + m.Sort + " "
 	}
 	return ""
 }
