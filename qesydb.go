@@ -340,7 +340,7 @@ func (m *Model) getSQLUpdate() string {
 	var strArr []string
 	for k, v := range m.Update {
 		m.Scan = append(m.Scan, v)
-		strArr = append(strArr, k+"=?")
+		strArr = append(strArr, "`"+k+"`=?")
 	}
 	return strings.Join(strArr, ",")
 }
@@ -358,7 +358,7 @@ func (m *Model) getSQLInsert() string {
 func (m *Model) getSQLInsertArr() string {
 	fieldArr, valuesArr := []string{}, []string{}
 	for k := range m.InsertArr[0] {
-		fieldArr = append(fieldArr, k)
+		fieldArr = append(fieldArr, "`"+k+"`")
 	}
 	for _, value := range m.InsertArr {
 		var valueArr []string
