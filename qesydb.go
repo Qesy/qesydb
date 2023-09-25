@@ -359,13 +359,14 @@ func (m *Model) getSQLInsert() string {
 }
 
 func (m *Model) getSQLInsertArr() string {
-	fieldArr, valuesArr := []string{}, []string{}
+	fieldArr, fieldArrKey, valuesArr := []string{}, []string{}, []string{}
 	for k := range m.InsertArr[0] {
 		fieldArr = append(fieldArr, "`"+k+"`")
+		fieldArrKey = append(fieldArrKey, k)
 	}
 	for _, value := range m.InsertArr {
 		var valueArr []string
-		for _, v := range fieldArr {
+		for _, v := range fieldArrKey {
 			m.Scan = append(m.Scan, value[v])
 			valueArr = append(valueArr, "?")
 		}
