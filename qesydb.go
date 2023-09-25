@@ -311,6 +311,9 @@ func (m *Model) getSQLCond() string {
 			}
 		}
 	}
+	if len(strArr) == 0 {
+		return ""
+	}
 	return " WHERE " + strings.Join(strArr, " && ")
 }
 
