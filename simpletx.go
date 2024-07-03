@@ -29,6 +29,11 @@ func ReplaceTx(TableName string, InsertArr map[string]string, m Model) (sql.Resu
 	return m.SetTable(TableName).SetInsert(InsertArr).ExecReplace()
 }
 
+// Replace 批量替换
+func ReplaceBatchTx(TableName string, InsertArr []map[string]string, m Model) (sql.Result, error) {
+	return m.SetTable(TableName).SetInsertArr(InsertArr).ExecReplaceBatch()
+}
+
 // UpdateTx 修改
 func UpdateTx(TableName string, UpdateArr map[string]string, Cond map[string]string, m Model) (sql.Result, error) {
 	return m.SetTable(TableName).SetWhere(Cond).SetUpdate(UpdateArr).ExecUpdate()

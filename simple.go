@@ -40,6 +40,12 @@ func Replace(TableName string, InsertArr map[string]string) (sql.Result, error) 
 	return m.SetTable(TableName).SetInsert(InsertArr).ExecReplace()
 }
 
+// Replace 批量替换
+func ReplaceBatch(TableName string, InsertArr []map[string]string) (sql.Result, error) {
+	var m Model
+	return m.SetTable(TableName).SetInsertArr(InsertArr).ExecReplaceBatch()
+}
+
 // Update 修改
 func Update(TableName string, UpdateArr map[string]string, Cond map[string]string) (sql.Result, error) {
 	var m Model

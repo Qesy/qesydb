@@ -214,6 +214,28 @@ func (m *Model) ExecReplace() (sql.Result, error) {
 	return result, err
 }
 
+// ExecReplace 替换
+func (m *Model) ExecReplaceBatch() (sql.Result, error) {
+	insert := m.getSQLInsertArr()
+	sqlStr := "REPLACE INTO " + m.Table + " " + insert + ";"
+	m.Debug(sqlStr)
+	var err error
+	var stmt *sql.Stmt
+	if m.Tx == nil {
+		stmt, err = Db.Prepare(sqlStr)
+	} else {
+		stmt, err = m.Tx.Prepare(sqlStr)
+	}
+	if err != nil {
+		logRecord("ERR:" + err.Error() + "SQL:" + sqlStr)
+		return nil, err
+	}
+	defer stmt.Close()
+	result, err := stmt.Exec(m.Scan...)
+	m.Clean()
+	return result, err
+}
+
 // ExecDelete 删除
 func (m *Model) ExecDelete() (sql.Result, error) {
 	condStr := m.getSQLCond()
